@@ -46,7 +46,7 @@ const Login = () => {
                 <Link ml="auto">Forgot password?</Link>
               </NextLink>
             </Flex>
-            <Button mt={4} type="submit" isLoading={isSubmitting}>
+            <Button mt={4} type="submit" variantcolor="teal" isLoading={isSubmitting}>
               Login
             </Button>
           </Form>
