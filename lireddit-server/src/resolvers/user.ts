@@ -6,6 +6,8 @@ import {
   Ctx,
   ObjectType,
   Query,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import { MyContext } from "../types";
 import { User } from "../entities/User";
@@ -34,13 +36,23 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
+    // this is the current user and its ok to show them their own email
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    // current user wants to see someone elses email
+    return "";
+  }
+
   @Mutation(() => UserResponse)
   async changePassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { redis, req }: MyContext
+    @Ctx() { redis, req }: MyContext,
   ): Promise<UserResponse> {
     if (newPassword.length <= 2) {
       return {
@@ -84,7 +96,7 @@ export class UserResolver {
       { id: userIdNum },
       {
         password: await argon2.hash(newPassword),
-      }
+      },
     );
 
     await redis.del(key);
@@ -98,7 +110,7 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
-    @Ctx() { redis }: MyContext
+    @Ctx() { redis }: MyContext,
   ) {
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -112,12 +124,12 @@ export class UserResolver {
       FORGET_PASSWORD_PREFIX + token,
       user.id,
       "ex",
-      1000 * 60 * 60 * 24 * 3
+      1000 * 60 * 60 * 24 * 3,
     ); // 3 days
 
     await sendEmail(
       email,
-      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`,
     );
 
     return true;
@@ -136,7 +148,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { req }: MyContext
+    @Ctx() { req }: MyContext,
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
     if (errors) {
@@ -147,7 +159,7 @@ export class UserResolver {
     let user;
     try {
       //User.create({username: options.username,email: options.email,password: hashedPassword,}).save()
-      
+
       const result = await getConnection()
         .createQueryBuilder()
         .insert()
@@ -186,12 +198,12 @@ export class UserResolver {
   async login(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { req }: MyContext
+    @Ctx() { req }: MyContext,
   ): Promise<UserResponse> {
     const user = await User.findOne(
       usernameOrEmail.includes("@")
         ? { where: { email: usernameOrEmail } }
-        : { where: { username: usernameOrEmail } }
+        : { where: { username: usernameOrEmail } },
     );
     if (!user) {
       return {
@@ -234,7 +246,7 @@ export class UserResolver {
         }
 
         resolve(true);
-      })
+      }),
     );
   }
 }

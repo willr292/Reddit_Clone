@@ -14,6 +14,7 @@ import { User } from "./entities/User";
 import { createConnection } from "typeorm";
 import { Post } from "./entities/Post";
 import path from "path";
+import { Upvote } from "./entities/Upvote";
 
 const main = async () => {
   const conn = await createConnection({
@@ -24,7 +25,7 @@ const main = async () => {
     logging: true,
     synchronize: true,
     migrations: [path.join(__dirname, "./migrations/*")],
-    entities: [Post, User],
+    entities: [Post, User, Upvote],
   });
   //await Post.delete({});
   await conn.runMigrations();
@@ -37,7 +38,7 @@ const main = async () => {
     cors({
       origin: "http://localhost:3000",
       credentials: true,
-    })
+    }),
   );
 
   app.use(
@@ -56,7 +57,7 @@ const main = async () => {
       saveUninitialized: false,
       secret: "testtesttest",
       resave: false,
-    })
+    }),
   );
 
   const apolloServer = new ApolloServer({
