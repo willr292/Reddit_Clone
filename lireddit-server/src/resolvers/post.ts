@@ -52,14 +52,14 @@ export class PostResolver {
     const { userId } = req.session;
     await getConnection().query(
       `
-    START TRANSACTION;
-    insert into upvote ("userId", "postId", value)
-    values (${userId},${postId},${realValue});
-    update post
-    set points = points + ${realValue}
-    where id = ${postId};
-    COMMIT;
-    `,
+      START TRANSACTION;
+      insert into upvote ("userId", "postId", value)
+      values (${userId},${postId},${realValue});
+      update post
+      set points = points + ${realValue}
+      where id = ${postId};
+      COMMIT;
+      `,
     );
     return true;
   }
