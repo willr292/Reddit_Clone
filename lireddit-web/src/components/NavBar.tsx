@@ -1,5 +1,5 @@
 import { Box, Link } from "@chakra-ui/layout";
-import { Button, Flex } from "@chakra-ui/react";
+import { Button, Flex, Heading } from "@chakra-ui/react";
 import * as React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
@@ -8,7 +8,7 @@ import { isServer } from "../utils/isServer";
 export const NavBar = () => {
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery({
-    pause: isServer()
+    pause: isServer(),
   });
   let body = null;
   if (fetching) {
@@ -26,7 +26,12 @@ export const NavBar = () => {
     );
   } else {
     body = (
-      <Flex>
+      <Flex align="center">
+        <NextLink href="/create-post">
+          <Button as={Link} mr={4}>
+            create post
+          </Button>
+        </NextLink>
         <Box mr={2}>{data.me.username}</Box>
         <Button
           onClick={() => {
@@ -35,14 +40,18 @@ export const NavBar = () => {
           isLoading={logoutFetching}
           variant="link"
         >
-          Logout
+          logout
         </Button>
       </Flex>
     );
   }
   return (
-    <Flex position='sticky' zIndex={1} top={0} bg="tan" p={4}>
-      {}
+    <Flex zIndex={1} position="sticky" top={0} bg="tan" p={4} align="center">
+      <NextLink href="/">
+        <Link>
+          <Heading>Reddit</Heading>
+        </Link>
+      </NextLink>
       <Box ml={"auto"}>{body}</Box>
     </Flex>
   );

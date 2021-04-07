@@ -54,7 +54,7 @@ const main = async () => {
         sameSite: "lax",
         secure: _prod_,
       },
-      saveUninitialized: false,
+      saveUninitialized: true,
       secret: "testtesttest",
       resave: false,
     }),
@@ -75,4 +75,6 @@ const main = async () => {
   });
 };
 
-main();
+main().catch((err) => {
+  console.error(err);
+});
