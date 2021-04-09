@@ -1,6 +1,10 @@
 import { withUrqlClient } from "next-urql";
 import { Layout } from "../components/Layout";
-import { useDeletePostMutation, usePostsQuery } from "../generated/graphql";
+import {
+  useDeletePostMutation,
+  useMeQuery,
+  usePostsQuery,
+} from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import {
   Box,
@@ -15,7 +19,7 @@ import {
 import NextLink from "next/link";
 import React, { useState } from "react";
 import { UpvoteSection } from "../components/UpvoteSection";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { EditDeletePostButtons } from "../components/EditDeletePostButtons";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -26,6 +30,8 @@ const Index = () => {
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
+
+  const [{ data: meData }] = useMeQuery();
 
   const [, deletePost] = useDeletePostMutation();
 
@@ -56,15 +62,12 @@ const Index = () => {
                     <Text flex={1} mt={4}>
                       {p.textSnippet}
                     </Text>
-                    <IconButton
-                      ml="auto"
-                      variantColor="red"
-                      icon={<DeleteIcon />}
-                      aria-label="Delete Post"
-                      onClick={() => {
-                        deletePost({ id: p.id });
-                      }}
-                    />
+                    <Box ml="auto">
+                      <EditDeletePostButtons
+                        id={p.id}
+                        creatorId={p.creator.id}
+                      />
+                    </Box>
                   </Flex>
                 </Box>
               </Flex>
